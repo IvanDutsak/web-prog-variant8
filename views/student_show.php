@@ -1,3 +1,9 @@
+<?php
+$studentModel = new Student();
+$student = $studentModel->find($id);
+$courses = $studentModel->getCourses($id);
+$title = $student['name'];
+?>
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -14,54 +20,56 @@
         </header>
         
         <nav>
-            <a href="index.php?action=courses">📖 Курси</a>
-            <a href="index.php?action=students">👥 Студенти</a>
+            <a href="index.php?page=courses">
+                📖 Курси
+            </a>
+            <a href="index.php?page=students" class="active">
+                👥 Студенти
+            </a>
         </nav>
         
         <main>
-            <a href="index.php?action=students" class="back-link">← Повернутися до списку студентів</a>
+            <div class="breadcrumb">
+                <a href="index.php?page=students">← Назад до списку студентів</a>
+            </div>
 
-            <div class="card" style="margin: 20px 0;">
-                <h2><?php echo htmlspecialchars($student->name); ?></h2>
-                
-                <p style="color: #666; margin: 15px 0;">
-                    <strong>Email:</strong> <?php echo htmlspecialchars($student->email); ?>
-                </p>
-                
-                <p style="color: #666; margin: 15px 0;">
-                    <strong>Номер студента:</strong> <?php echo htmlspecialchars($student->student_number); ?>
-                </p>
-                
-                <p style="color: #667eea; font-weight: bold; margin: 15px 0;">
-                    📚 Записаних курсів: <span style="font-size: 20px;"><?php echo $student->getCourseCount(); ?></span>
-                </p>
+            <div class="student-detail">
+                <h2>👤 <?php echo htmlspecialchars($student['name']); ?></h2>
+                <div class="meta">
+                    <span>📧 Email: <?php echo htmlspecialchars($student['email']); ?></span>
+                    <span>🎓 Номер: <?php echo htmlspecialchars($student['student_number']); ?></span>
+                    <span>📚 Курсів: <?php echo count($courses); ?></span>
+                </div>
             </div>
 
             <h3>📖 Курси студента</h3>
 
             <?php if (empty($courses)): ?>
                 <div class="empty-state">
-                    <p>Студент не записаний на жодний курс</p>
+                    <p>Студент ще не записаний на жоден курс</p>
                 </div>
             <?php else: ?>
-                <table>
+                <table class="table">
                     <thead>
                         <tr>
+                            <th>#</th>
                             <th>Назва курсу</th>
+                            <th>Опис</th>
                             <th>Викладач</th>
-                            <th>Студентів на курсі</th>
-                            <th>Дія</th>
+                            <th>Дії</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <?php $counter = 1; ?>
                         <?php foreach ($courses as $course): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($course->name); ?></td>
-                                <td><?php echo htmlspecialchars($course->instructor); ?></td>
-                                <td><?php echo $course->getStudentCount(); ?></td>
+                                <td><?php echo $counter++; ?></td>
+                                <td><?php echo htmlspecialchars($course['name']); ?></td>
+                                <td><?php echo htmlspecialchars(substr($course['description'], 0, 100)) . '...'; ?></td>
+                                <td><?php echo htmlspecialchars($course['instructor']); ?></td>
                                 <td>
-                                    <a href="index.php?action=course&id=<?php echo $course->id; ?>" class="btn btn-small">
-                                        Переглянути
+                                    <a href="index.php?page=courses&id=<?php echo $course['id']; ?>" class="btn-small">
+                                        Переглянути →
                                     </a>
                                 </td>
                             </tr>

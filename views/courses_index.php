@@ -1,3 +1,9 @@
+<?php
+$courseModel = new Course();
+$courses = $courseModel->all();
+$title = 'Курси';
+$currentAction = 'courses';
+?>
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -14,10 +20,10 @@
         </header>
         
         <nav>
-            <a href="index.php?action=courses" class="<?php echo $currentAction === 'courses' ? 'active' : ''; ?>">
+            <a href="index.php?page=courses" class="active">
                 📖 Курси
             </a>
-            <a href="index.php?action=students" class="<?php echo $currentAction === 'students' ? 'active' : ''; ?>">
+            <a href="index.php?page=students">
                 👥 Студенти
             </a>
         </nav>
@@ -31,11 +37,10 @@
                 <div class="stat-box">
                     <div class="number">
                         <?php 
-                        $totalEnrollments = 0;
-                        foreach ($courses as $course) {
-                            $totalEnrollments += $course->getStudentCount();
-                        }
-                        echo $totalEnrollments;
+                        $db = Database::getInstance()->getConnection();
+                        $stmt = $db->query("SELECT COUNT(*) as total FROM enrollments");
+                        $result = $stmt->fetch();
+                        echo $result['total'];
                         ?>
                     </div>
                     <div class="label">Записів студентів</div>
@@ -53,13 +58,20 @@
                 <div class="grid">
                     <?php foreach ($courses as $course): ?>
                         <div class="card">
-                            <h3><?php echo htmlspecialchars($course->name); ?></h3>
-                            <p class="description"><?php echo htmlspecialchars($course->description); ?></p>
+                            <h3><?php echo htmlspecialchars($course['name']); ?></h3>
+                            <p class="description"><?php echo htmlspecialchars($course['description']); ?></p>
                             <div class="meta">
-                                <span>👨‍🏫 <?php echo htmlspecialchars($course->instructor); ?></span>
-                                <span>👥 <?php echo $course->getStudentCount(); ?> студентів</span>
+                                <span>👨‍🏫 <?php echo htmlspecialchars($course['instructor']); ?></span>
+                                <span>👥 
+                                    <?php 
+                                    $stmt = $db->prepare("SELECT COUNT(*) as count FROM enrollments WHERE course_id = ?");
+                                    $stmt->execute([$course['id']]);
+                                    $count = $stmt->fetch();
+                                    echo $count['count'];
+                                    ?> студентів
+                                </span>
                             </div>
-                            <a href="index.php?action=course&id=<?php echo $course->id; ?>" class="btn">
+                            <a href="index.php?page=courses&id=<?php echo $course['id']; ?>" class="btn">
                                 Переглянути деталі →
                             </a>
                         </div>
